@@ -1,7 +1,7 @@
 Package: OralOpioids
 Type: Package
 Title: Retrieving Oral Opioid Information
-Version: 2.0.0
+Version: 2.0.1
 Authors@R: 
   c(person(family = "Banerjee",
            given = "Ankona",
@@ -26,13 +26,13 @@ License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Imports: dplyr, tidyr, readr, purrr, plyr,jsonlite, reshape2, stringr,
-        openxlsx, rvest, xml2, utils, rlang
+        openxlsx, rvest, xml2, utils, rlang,magrittr
 Suggests: knitr, rmarkdown
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-12-20 19:26:55 UTC; u243494
+Packaged: 2024-01-09 01:05:01 UTC; u243494
 Author: Ankona Banerjee [aut, cre] (<https://orcid.org/0000-0003-4433-5446>),
   Erik Stricker [aut] (<https://orcid.org/0000-0003-2112-2202>)
 Repository: CRAN
-Date/Publication: 2023-12-21 00:50:10 UTC
+Date/Publication: 2024-01-09 03:20:02 UTC

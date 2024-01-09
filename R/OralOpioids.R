@@ -9,7 +9,7 @@
 #' @aliases OralOpioids-package
   NULL
 
-## Version 2.0.0
+## Version 2.0.1
 
 #'Obtain the latest Opioid data from Health Canada
 #'
@@ -399,8 +399,8 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
 
 
 
-      status <- status[,-3]
-
+      status <- status[,-1]
+      names(status)[3] <- "ID"
 
 
       status <- reshape2::dcast (status,ID~ ranks, value.var= "Status")
@@ -693,7 +693,7 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
         dplyr::group_by(Big_Data$Drug_ID,Big_Data$MED_per_dispensing_unit) %>%
         dplyr::tally()
 
-
+      names(Drug_ID_count) <- c("Drug_ID","MED_per_dispensing_unit","n")
       Big_Data <- merge(Big_Data, Drug_ID_count, by= c("Drug_ID","MED_per_dispensing_unit"))
 
 
@@ -845,7 +845,9 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
 #'@return The function returns the FDA_Opioid_Table as a data.frame. Comments on the data.frame
 #'include a status message (msg), the FDA_Opioid_Table save path (path),
 #'a disclaimer, and the source for the retrieved data (source_url_data and source_url_dosing).
-#'
+
+#' @import utils
+#' @importFrom magrittr "%>%"
 #' @importFrom openxlsx read.xlsx write.xlsx
 #' @importFrom rlang .data
 #' @importFrom stringr str_split str_sub word
@@ -853,7 +855,6 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
 #' @importFrom reshape2 dcast
 #' @importFrom tidyr unnest
 #' @importFrom jsonlite fromJSON
-#' @import utils
 #' @rawNamespace import(dplyr, except = rename)
 #' @importFrom plyr rename
 #' @importFrom rvest html_table
@@ -994,10 +995,10 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
       ## 1) Get FDA data
 
       temp <- tempfile()
-      download.file("https://download.open.fda.gov/drug/ndc/drug-ndc-0001-of-0001.json.zip",temp,quiet = FALSE, mode = "wb",flatten=T,simplifyVector = TRUE)
-      tmp1 <- unzip(temp)
+      download.file("https://download.open.fda.gov/drug/ndc/drug-ndc-0001-of-0001.json.zip",destfile = temp,quiet = FALSE, mode = "wb",flatten=T,simplifyVector = TRUE)
+      tmp1 <- unzip(temp, exdir = dirname(temp))
       result <- jsonlite::fromJSON(tmp1)
-      unlink(temp,recursive = TRUE)
+      unlink(dirname(temp),recursive = TRUE)
       drug <- result$results
       g1 <- drug[,c("product_ndc","pharm_class")]
 
@@ -1021,7 +1022,7 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
       b1 <- merge(b1,Opioid_ndc,by="product_ndc")
 
       colnames(b1) <- c("colA","colB","brand_name")
-      c <- b1 %>% tidyr::unnest(.data$colB, .data$brand_name)
+      c <- b1 %>% tidyr::unnest(c(.data$colB, .data$brand_name))
 
       c <- unique(c)
 
@@ -1110,12 +1111,17 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
 
       drug2$Opioid_1 <- stringr::word(drug2$name, 1)
 
-      colnames(drug2)
-      drug2 <- drug2[,c(1,4,5,7:9,13,14,15,16,17,20,21)]
-      names(drug2)[c(7,10,11)] <- c("brand_name","dosage_form","route")
+      drug2 <- drug2[,c("product_ndc","name","strength","Base1",
+                        "Base2","Base3","generic_name", "brand_name.y",
+                        "active_ingredients","marketing_category",
+                        "dosage_form.y","brand_name_base",
+                        "pharm_class",
+                        "Ingredients","Opioid_1","route.y")]
 
-      drug2$MED <-0
-      drug2$MED<- ifelse (drug2$Opioid_1 %in% c("BUPRENORPHINE","NALOXONE"),
+      names(drug2)[c(8,11,16)] <- c("brand_name","dosage_form","route")
+
+      drug2$MED <- 0
+      drug2$MED <- ifelse (drug2$Opioid_1 %in% c("BUPRENORPHINE","NALOXONE"),
                           "Couldn't be calculated",drug2$MED)
 
 
@@ -1129,14 +1135,14 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
                            ((drug2$Base1*0.15)/drug2$Base2),drug2$MED)
 
       drug2$MED <- ifelse ((drug2$route=="ORAL" & drug2$Opioid_1=="HYDROCODONE"),
-                           ((drug2$Base1*1.5)/drug2$Base2),drug2$MED)
+                           ((drug2$Base1*1)/drug2$Base2),drug2$MED)
 
       drug2$MED <- ifelse ((drug2$route=="ORAL" & drug2$Opioid_1=="OXYCODONE"),
                            ((drug2$Base1*1.5)/drug2$Base2),drug2$MED)
 
 
       drug2$MED <- ifelse ((drug2$route=="ORAL" & drug2$Opioid_1=="HYDROMORPHONE"),
-                           ((drug2$Base1*5)/drug2$Base2),drug2$MED)
+                           ((drug2$Base1*4)/drug2$Base2),drug2$MED)
 
       drug2$MED <- ifelse ((drug2$route=="RECTAL" & drug2$Opioid_1=="MORPHINE"),
                            ((drug2$Base1*3)/drug2$Base2),drug2$MED)
@@ -1170,7 +1176,7 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
 
 
       drug2$MED <- ifelse ((drug2$route=="TRANSDERMAL" & drug2$Opioid_1=="FENTANYL"),
-                           ((drug2$Base1*7.2)/drug2$Base2),drug2$MED)
+                           ((drug2$Base1*2.4)/drug2$Base2),drug2$MED)
 
       drug2$MED <- ifelse ((drug2$route=="ORAL" & drug2$Opioid_1=="DIHYDROCODEINE"),
                            ((drug2$Base1*0.25)/drug2$Base2),drug2$MED)
@@ -1212,8 +1218,18 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
       colnames(drug2)[colnames(drug2) == "Threshold_14days"] <- "Maximum No_tabs/ml assuming 50 MED limit for 14 days"
       colnames(drug2)[colnames(drug2) == "Threshold_30days"] <- "Maximum No_tabs/ml assuming 50 MED limit for 30 days"
 
-      drug2$last_updated <- pmax(file_date, second_table_date)
+      if (length(FDA_Opioid_Table_file_indices) == 0) {
+        # If empty, just assign second_table_date to the entire column
+        drug2$last_updated <- second_table_date
+      } else {
+        # If not empty, proceed with your original logic
+        drug2$last_updated <- ifelse(!is.na(FDA_Opioid_Table_file_indices),
+                                     pmax(file_date, second_table_date),
+                                     second_table_date)
 
+        drug2$last_updated <-  as.Date(drug2$last_updated, origin = "1970-01-01")
+
+      }
 
 
       FDA_Opioid_Table <- drug2
@@ -1336,9 +1352,10 @@ MED <- function(Drug_ID,Opioid_Table){
 
     out_MED_per_dispensing_unit <- suppressWarnings(as.numeric(a$MED_per_dispensing_unit))
     if (is.na(out_MED_per_dispensing_unit[1])){
-      out_MED_per_dispensing_unit <- a$MED_per_dispensing_unit
+      return("MED for this Drug_ID couldn't be calculated.")
+    }else {
+      return(out_MED_per_dispensing_unit)
     }
-    return(out_MED_per_dispensing_unit)
   }
   else return("The Drug_ID could not be found in the Opioid_Table.")
 }
@@ -1421,11 +1438,14 @@ MED_50 <- function(Drug_ID,Opioid_Table){
     a <- Opioid_Table[which(Opioid_Table$Drug_ID == Drug_ID),]
     out_MED50_per_dispensing_unit <- suppressWarnings(as.numeric(a$`No_tabs/ml assuming 50 MED limit per day`))
     if (is.na(out_MED50_per_dispensing_unit[1])){
-      out_MED50_per_dispensing_unit <- a$`No_tabs/ml assuming 50 MED limit per day`
+      return("MED_50 for this Drug_ID couldn't be calculated.")
+    }else {
+      return(out_MED50_per_dispensing_unit)
     }
-    return(out_MED50_per_dispensing_unit)
-  } else return("The Drug_ID could not be found in the Opioid_Table.")
+  }
+  else return("The Drug_ID could not be found in the Opioid_Table.")
 }
+
 
 #'Maximum number of units/millilitres of oral opioids allowed per day assuming a daily limit of 90 MED/day for a DIN or NDC from the Opioid Table by using the DIN the NDC
 #'
@@ -1451,13 +1471,13 @@ MED_90 <- function(Drug_ID,Opioid_Table){
     a <- Opioid_Table[which(Opioid_Table$Drug_ID == Drug_ID),]
     out_MED90_per_dispensing_unit <- suppressWarnings(as.numeric(a$`No_tabs/ml assuming 90 MED limit per day`))
     if (is.na(out_MED90_per_dispensing_unit[1])){
-      out_MED90_per_dispensing_unit <- a$`No_tabs/ml assuming 90 MED limit per day`
+      return("MED_90 for this Drug_ID couldn't be calculated.")
+    }else {
+      return(out_MED90_per_dispensing_unit)
     }
-    return(out_MED90_per_dispensing_unit)
-  } else return("The Drug_ID could not be found in the Opioid_Table.")
+  }
+  else return("The Drug_ID could not be found in the Opioid_Table.")
 }
-
-
 
 
 

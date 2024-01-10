@@ -9,7 +9,7 @@
 #' @aliases OralOpioids-package
   NULL
 
-## Version 2.0.2
+## Version 2.0.3
 
 #'Obtain the latest Opioid data from Health Canada
 #'
@@ -68,7 +68,6 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
 
   second_table_date <- as.Date(as.character(second_table_date))
 
-  ## Get HealthCanada_Opioid_Table date ---------------------
   HealthCanada_Opioid_Table_is_old <- TRUE
   HealthCanada_Opioid_Table_files_exist <- FALSE
   ## List all files in filelocation
@@ -81,7 +80,11 @@ load_HealthCanada_Opioid_Table <- function(filelocation = "", no_download = FALS
     list_of_HealthCanada_Opioid_Table_files <- NULL
     for (i in HealthCanada_Opioid_Table_file_indices){
       file_date <- as.Date(as.character(substr(downloaded_files[i],1,10)))
-      list_of_dates <- c(list_of_dates,file_date)
+      if (length(list_of_dates) == 0){
+        list_of_dates <- file_date
+      } else {
+        list_of_dates <- c(list_of_dates,file_date)
+      }
       list_of_HealthCanada_Opioid_Table_files <- c(list_of_HealthCanada_Opioid_Table_files,downloaded_files[i])
       ##if a file is has the same or a newer date than the second_table_date
       ##the HealthCanada_Opioid_Table is up to date
@@ -891,7 +894,12 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
     list_of_FDA_Opioid_Table_files <- NULL
     for (i in FDA_Opioid_Table_file_indices){
       file_date <- as.Date(as.character(substr(downloaded_files[i],1,10)))
-      list_of_dates <- c(list_of_dates,file_date)
+      if (length(list_of_dates) == 0){
+        list_of_dates <- file_date
+      } else {
+        list_of_dates <- c(list_of_dates,file_date)
+      }
+      file_date <- max(list_of_dates)
       list_of_FDA_Opioid_Table_files <- c(list_of_FDA_Opioid_Table_files,downloaded_files[i])
       ##if a file is has the same or a newer date than the second_table_date
       ##the FDAOpioid_Table is up to date
@@ -1226,13 +1234,14 @@ load_FDA_Opioid_Table <- function(filelocation = "", no_download = FALSE, verbos
         drug2$last_updated <- second_table_date
       } else {
         # If not empty, proceed with your original logic
-        drug2$last_updated <- ifelse(!is.na(FDA_Opioid_Table_file_indices),
+        drug2$last_updated <- ifelse(!is.na(length(FDA_Opioid_Table_file_indices)),
                                      pmax(file_date, second_table_date),
                                      second_table_date)
-
         drug2$last_updated <-  as.Date(drug2$last_updated, origin = "1970-01-01")
-
       }
+
+
+
 
 
       FDA_Opioid_Table <- drug2

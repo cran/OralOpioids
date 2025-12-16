@@ -1,12 +1,12 @@
-1a8249da630df39cd5ead736fccb2636 *DESCRIPTION
+d4bc1af4f6c06a02dcd4425ff96cc9a2 *DESCRIPTION
 e7538819695f40580afb55a1b4724e84 *NAMESPACE
-183298ca803d59cd302355813e0e2533 *NEWS.md
-036c8c71b46a465fd8e9c67d004d343d *R/OralOpioids.R
+a9465c72e0ef887d8576520d2110b256 *NEWS.md
+29891056905fa50ec12503489cdad8fa *R/OralOpioids.R
 cf794928715019cf81bd51d467156178 *R/utils-pipe.R
 e824e79c9c367782df44f0d7e245330f *README.md
-1c928d6e69108fed06503450c2983706 *build/vignette.rds
+f877df6183bd5319f57d20c36d7df8d9 *build/vignette.rds
 cb7bdfd78c2b6af751a198a7c2935c2c *inst/doc/OralOpioid.Rmd
-3e4766a1e5986ec83f48bc6062883790 *inst/doc/OralOpioid.pdf
+cbc3e6861c63adb48890642a280fdb71 *inst/doc/OralOpioid.pdf
 28fd40fa9efc6b310226be1efa6e66e0 *inst/download/2025-01-02_HealthCanada_Opioid_Table.xlsx
 ddf5f5d45ab88c8e9f45bda8db5f0215 *inst/download/2025-01-03_FDA_Opioid_Table.xlsx
 44c2e39c0594205e1bc7f55a80c48de8 *inst/download/2025-01-08_FDA_Opioid_Table.xlsx
@@ -16,7 +16,7 @@ b15a03a157fb7b01c9cd2906b1911417 *man/MED.Rd
 a7276f792d97a1513ca61ece1b400d0a *man/MED_50.Rd
 54bf280fe4670ca80ccaac779f95d476 *man/MED_90.Rd
 35bdcf6e815c75f8c84fbd2177fc3b90 *man/Opioid.Rd
-543274c0bb53ec4d290a3201be609d38 *man/OralOpioids.Rd
+022b35e556962295a54b9243b0aa47e5 *man/OralOpioids-package.Rd
 6a9b1cf4dfc6a95689a6c02ae2556331 *man/load_FDA_Opioid_Table.Rd
 2baa210c7835b0690ae8b67a729bf9cc *man/load_HealthCanada_Opioid_Table.Rd
 4b1ecb1e8a328367307330eeb8d026c5 *man/load_Opioid_Table.Rd
